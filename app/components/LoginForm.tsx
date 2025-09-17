@@ -1,5 +1,5 @@
 "use client";
-import React, { useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CradWrapper from "@/components/auth/CradWrapper";
@@ -17,8 +17,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { login } from "@/actions/login";
+import Message from "@/components/auth/Message";
 
 function LoginForm() {
+    const [error, setError] = useState<string | null>();
+    const [success, setSuccess] = useState<string | null>();
     const [isPending, startTransition] = useTransition();
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -30,7 +33,15 @@ function LoginForm() {
 
     const handleSubmit = (values: z.infer<typeof LoginSchema>) => {
         startTransition(() => {
-            login(values);
+            login(values).then((data) => {
+                // This will only run if login returns an error (failed authentication)
+                if (data?.error) {
+                    setError(data.error);
+                }
+                // if (data?.success) {
+                //     setSuccess(data.success);
+                // }
+            });
         });
     };
 
@@ -84,6 +95,8 @@ function LoginForm() {
                             </FormItem>
                         )}
                     />
+                    {error && <Message type="error" label={error} />}
+                    {success && <Message type="success" label={success} />}
                     <Button
                         disabled={isPending}
                         variant="custom_pur"

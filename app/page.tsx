@@ -7,7 +7,7 @@ import Habits from "./components/Habits";
 export default function Home() {
     return (
         <div>
-            <Navbar />
+            <Navbar auth={false} />
             <CreateHabit />
             <Habits />
         </div>
