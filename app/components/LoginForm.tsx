@@ -3,6 +3,7 @@ import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CradWrapper from "@/components/auth/CradWrapper";
+import { useSearchParams } from "next/navigation";
 
 import * as z from "zod";
 import { LoginSchema } from "@/schemas";
@@ -20,6 +21,11 @@ import { login } from "@/actions/login";
 import Message from "@/components/auth/Message";
 
 function LoginForm() {
+    const searchParams = useSearchParams();
+    const urlError =
+        searchParams.get("error") === "OAuthAccountNotLinked"
+            ? "Email already in use!"
+            : "";
     const [error, setError] = useState<string | null>();
     const [success, setSuccess] = useState<string | null>();
     const [isPending, startTransition] = useTransition();
@@ -37,10 +43,8 @@ function LoginForm() {
                 // This will only run if login returns an error (failed authentication)
                 if (data?.error) {
                     setError(data.error);
+                    // 2FA
                 }
-                // if (data?.success) {
-                //     setSuccess(data.success);
-                // }
             });
         });
     };
@@ -95,7 +99,7 @@ function LoginForm() {
                             </FormItem>
                         )}
                     />
-                    {error && <Message type="error" label={error} />}
+                    {error || urlError && <Message type="error" label={error || urlError} />}
                     {success && <Message type="success" label={success} />}
                     <Button
                         disabled={isPending}
