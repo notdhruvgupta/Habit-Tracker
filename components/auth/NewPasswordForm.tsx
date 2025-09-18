@@ -1,41 +1,39 @@
 "use client";
 import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import CradWrapper from "@/components/auth/CradWrapper";
-
+import CradWrapper from "./CradWrapper";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import * as z from "zod";
-import { RegisterSchema } from "@/schemas";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { register } from "@/actions/register";
-import Message from "@/components/auth/Message";
+import { useForm } from "react-hook-form";
+import { PassSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { useSearchParams } from "next/navigation";
+import Message from "./Message";
+import { ResetPassword } from "@/actions/new-password";
 import { LoaderCircle } from "lucide-react";
 
-function RegisterForm() {
+function NewPasswordForm() {
+    const searchParams = useSearchParams();
+    const token = searchParams.get("token");
     const [error, setError] = useState<string | null>();
     const [success, setSuccess] = useState<string | null>();
     const [isPending, startTransition] = useTransition();
-    const form = useForm<z.infer<typeof RegisterSchema>>({
-        resolver: zodResolver(RegisterSchema),
+    const form = useForm<z.infer<typeof PassSchema>>({
+        resolver: zodResolver(PassSchema),
         defaultValues: {
-            name: "",
-            email: "",
             password: "",
+            confirmPassword: "",
         },
     });
 
-    const handleSubmit = (values: z.infer<typeof RegisterSchema>) => {
+    const handleSubmit = (values: z.infer<typeof PassSchema>) => {
+        if (!token) {
+            setError("Missing Token!");
+            return;
+        }
         startTransition(() => {
-            register(values).then((data) => {
+            ResetPassword(values, token).then((data) => {
                 setError(data.error);
                 setSuccess(data.success);
             });
@@ -44,54 +42,16 @@ function RegisterForm() {
 
     return (
         <CradWrapper
-            header="Register | Habit Tracker Account"
-            backbutton="Already have an account?"
+            header="Reset Password"
+            socials={false}
+            backbutton="Back to login"
             backbuttonHref="/auth/login"
-            socials
         >
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
                     className="space-y-5"
                 >
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        disabled={isPending}
-                                        {...field}
-                                        placeholder="Dhruv Gupta"
-                                        type="text"
-                                        className="border-light-purple/20 bg-light-purple/5 selection:bg-light-purple/30 selection:text-white"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        disabled={isPending}
-                                        {...field}
-                                        placeholder="example@email.com"
-                                        type="email"
-                                        className="border-light-purple/20 bg-light-purple/5  selection:bg-light-purple/30 selection:text-white"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     <FormField
                         control={form.control}
                         name="password"
@@ -104,10 +64,28 @@ function RegisterForm() {
                                         {...field}
                                         placeholder="******"
                                         type="password"
-                                        className="border-light-purple/20 bg-light-purple/5  selection:bg-light-purple/30 selection:text-white"
-                                    />
+                                        className="border-light-purple/20 bg-light-purple/5 selection:bg-light-purple/30 selection:text-white"
+                                    ></Input>
                                 </FormControl>
-                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Confirm Password</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        disabled={isPending}
+                                        {...field}
+                                        placeholder="******"
+                                        type="password"
+                                        className="border-light-purple/20 bg-light-purple/5 selection:bg-light-purple/30 selection:text-white"
+                                    ></Input>
+                                </FormControl>
+                                <p className="text-sm text-red-500">{form.formState.errors.confirmPassword?.message}</p>
                             </FormItem>
                         )}
                     />
@@ -122,7 +100,7 @@ function RegisterForm() {
                         {isPending && (
                             <LoaderCircle className=" animate-spin" />
                         )}
-                        Create an account
+                        Reset Password
                     </Button>
                 </form>
             </Form>
@@ -130,4 +108,4 @@ function RegisterForm() {
     );
 }
 
-export default RegisterForm;
+export default NewPasswordForm;

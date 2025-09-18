@@ -23,6 +23,7 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
   accounts      Account[]
+  habits        Habit[]
   password      String?
 
   @@map("users")
@@ -49,10 +50,31 @@ model Account {
 }
 
 model VerificationToken {
-  id String @default(cuid())
-  email String
-  token String @unique
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])
+}
+
+model PasswordVerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model Habit {
+  id       String  @id @default(cuid())
+  title    String
+  subtitle String?
+  icon     String
+  color    String
+  User     User?   @relation(fields: [userId], references: [id])
+  userId   String?
+
+  @@map("habits")
 }

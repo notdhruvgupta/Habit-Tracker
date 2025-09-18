@@ -1,26 +1,20 @@
-import { auth, signOut } from "@/auth";
+"use client"
+import { logout } from "@/actions/logout";
+import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/hooks/get-current-user";
 import React from "react";
 
-async function Settings() {
-    const session = await auth();
+function Settings() {
+    const user = getCurrentUser();
+
+    const onClick = () => {
+        logout();
+    }
 
     return (
         <div className="text-white">
-            <p>Settings</p>
-            <div className="text-2xl">
-                <p>{session?.user?.name}</p>
-                <p>{session?.user?.email}</p>
-                <p>{session?.expires}</p>
-            </div>
-
-            <form
-                action={async () => {
-                    "use server";
-                    await signOut();
-                }}
-            >
-                <button type="submit">Sign Out</button>
-            </form>
+            {JSON.stringify(user)}
+            <Button variant='destructive' className=" cursor-pointer" onClick={onClick}>Sign Out</Button>
         </div>
     );
 }

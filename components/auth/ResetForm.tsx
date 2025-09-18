@@ -3,10 +3,9 @@ import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CradWrapper from "@/components/auth/CradWrapper";
-import { useSearchParams } from "next/navigation";
 
 import * as z from "zod";
-import { LoginSchema } from "@/schemas";
+import { ResetSchema } from "@/schemas";
 import {
     Form,
     FormControl,
@@ -17,44 +16,38 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { login } from "@/actions/login";
 import Message from "@/components/auth/Message";
 import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
+import { sendReset } from "@/actions/reset";
 
-function LoginForm() {
-    const searchParams = useSearchParams();
+function ResetForm() {
     const [error, setError] = useState<string | null>();
     const [success, setSuccess] = useState<string | null>();
     const [isPending, startTransition] = useTransition();
-    const form = useForm<z.infer<typeof LoginSchema>>({
-        resolver: zodResolver(LoginSchema),
+    const form = useForm<z.infer<typeof ResetSchema>>({
+        resolver: zodResolver(ResetSchema),
         defaultValues: {
             email: "",
-            password: "",
         },
     });
 
-    const urlError =
-        searchParams.get("error") === "OAuthAccountNotLinked"
-            ? "Email already in use!"
-            : "";
-    
-    const handleSubmit = (values: z.infer<typeof LoginSchema>) => {
+    const handleSubmit = (values: z.infer<typeof ResetSchema>) => {
         startTransition(() => {
-            login(values).then((data) => {
-                setError(data?.error);
-                setSuccess(data?.success);
-            });
+            sendReset(values)
+            .then((data) => {
+                setError(data.error)
+                setSuccess(data.success)
+            })
         });
     };
 
     return (
         <CradWrapper
-            header="Login | Habit Tracker Account"
+            header="Forgot your password?"
             backbutton="Don't have an account?"
             backbuttonHref="/auth/register"
-            socials
+            socials={false}
         >
             <Form {...form}>
                 <form
@@ -80,29 +73,7 @@ function LoginForm() {
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        disabled={isPending}
-                                        {...field}
-                                        placeholder="******"
-                                        type="password"
-                                        className="border-light-purple/20 bg-light-purple/5 selection:bg-light-purple/30 selection:text-white"
-                                    />
-                                </FormControl>
-                                <Button size='sm' variant='link' asChild className="text-white px-0 w-fit flex font-normal justify-start">
-                                    <Link href='/auth/reset'>Forgot Password</Link>
-                                </Button>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    {(error || urlError) && <Message type="error" label={error || urlError} />}
+                    {error && <Message type="error" label={error} />}
                     {success && <Message type="success" label={success} />}
                     <Button
                         disabled={isPending}
@@ -110,8 +81,10 @@ function LoginForm() {
                         type="submit"
                         className="w-full cursor-pointer text-purple"
                     >
-                        {isPending && <LoaderCircle className=" animate-spin" />}
-                        Login
+                        {isPending && (
+                            <LoaderCircle className=" animate-spin" />
+                        )}
+                        Send Reset Email
                     </Button>
                 </form>
             </Form>
@@ -119,4 +92,4 @@ function LoginForm() {
     );
 }
 
-export default LoginForm;
+export default ResetForm;
