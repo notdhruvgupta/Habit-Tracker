@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
+import { Toaster } from "sonner";
 
 const roboto = Roboto({
     variable: "--font-roboto",
@@ -28,6 +29,7 @@ export default async function RootLayout({
                     className={`${roboto.variable} antialiased m-5`}
                 >
                     {children}
+                    <Toaster richColors position="top-center"/>
                 </body>
             </html>
         </SessionProvider>

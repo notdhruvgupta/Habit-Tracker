@@ -1,5 +1,7 @@
-import { Subtitles } from "lucide-react";
+import { FEATURED_COLORS } from "@/data/colors";
 import * as z from "zod";
+
+const COLOR_NAMES = FEATURED_COLORS.map(color => color.name);
 
 export const PassSchema = z
     .object({
@@ -36,19 +38,18 @@ export const HabitSchema = z.object({
     title: z
         .string()
         .min(2, { message: "Title must be at least 2 characters long" })
-        .max(50, { message: "Title too long" }),
+        .max(20, { message: "Title too long" }),
     subtitle: z
         .string()
-        .max(100, { message: "Subtitle too long" })
+        .max(50, { message: "Subtitle too long" })
         .optional()
         .or(z.literal("")),
-    icon: z.enum(["gym", "coding", "fitness", "active"]),
-    color: z.enum([
-        "mint-green",
-        "sky-blue",
-        "lavender",
-        "peach",
-        "pastel-yellow",
-        "pale-coral",
-    ]),
+    icon: z.string().min(1, "Please select an icon"),
+    color: z.enum([...COLOR_NAMES, "white"]),
+});
+
+export const HabitLogSchema = z.object({
+  habitId: z.string(),
+  date: z.date(),
+  completed: z.boolean(),
 });

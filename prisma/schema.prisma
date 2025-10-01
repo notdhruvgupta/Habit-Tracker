@@ -16,6 +16,16 @@ datasource db {
   // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+enum Color {
+  mint_green    @map("mint-green")
+  sky_blue      @map("sky-blue")
+  lavender
+  peach
+  pastel_yellow @map("pastel-yellow")
+  pale_coral    @map("pale-coral")
+  white
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -67,14 +77,29 @@ model PasswordVerificationToken {
   @@unique([email, token])
 }
 
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  date      DateTime
+  completed Boolean
+  Habit     Habit?   @relation(fields: [habitId], references: [id])
+
+  @@unique([habitId, date])
+}
+
 model Habit {
   id       String  @id @default(cuid())
   title    String
   subtitle String?
   icon     String
-  color    String
+  color    Color
   User     User?   @relation(fields: [userId], references: [id])
   userId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  logs HabitLog[]
 
   @@map("habits")
 }
